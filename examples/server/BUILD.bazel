@@ -1,0 +1,38 @@
+load("@build_bazel_rules_typescript//:defs.bzl", "ts_library")
+load("@build_bazel_rules_nodejs//:defs.bzl", "nodejs_binary")
+load("//:defs.bzl", "docker_nodejs_image", "docker_push_group")
+
+package(default_visibility = ["//visibility:public"])
+
+
+ts_library(
+    name = "lib",
+    srcs = glob([
+        "*.ts",
+    ])
+)
+
+nodejs_binary(
+    name = "server",
+    data = [":lib"],
+    entry_point = "monorepo_example/apps/server/index.js"
+) 
+
+docker_nodejs_image(
+    name = "image",
+    entry_point = "monorepo_example/apps/server/index.js",
+    node_modules = "//:node_modules",
+    data = [":lib"],
+    ports = ["80"],
+)
+
+# produces 
+#   bazel build examples/server:push_image.0
+#   bazel build examples/server:push_image.1
+docker_push_group(
+    name = "push_image",
+    image = ":image",
+    registry = "gcr.io",
+    repository = "my-project/my-image",
+    tags = ["dev", "{BUILD_SCM_VERSION}"],
+)

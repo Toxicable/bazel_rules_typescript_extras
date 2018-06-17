@@ -1,0 +1,21 @@
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["tsconfig.json"])
+
+load("@build_bazel_rules_nodejs//:defs.bzl", "node_modules_filegroup")
+
+alias(
+    name = "install",
+    actual = "@yarn//:yarn",
+)
+
+node_modules_filegroup(
+    name = "node_modules",
+    packages = [        
+        "rxjs",
+        "tsickle",
+        "tslib",
+        "tsutils",
+        "typescript",
+    ],
+)
